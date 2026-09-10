@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sora: "Sora", sans-serif;
+  --font-manrope: "Manrope", sans-serif;
+
+  --color-surface: #0d0f17;
+  --color-surface-dim: #0d0f17;
+  --color-surface-bright: #222638;
+  --color-surface-container-lowest: #08090f;
+  --color-surface-container-low: #11131c;
+  --color-surface-container: #151722;
+  --color-surface-container-high: #1c1f30;
+  --color-surface-container-highest: #24283c;
+  --color-surface-variant: #1a1d2d;
+
+  --color-on-surface: #f9fafb;
+  --color-on-surface-variant: #9ca3af;
+  --color-outline: #374151;
+  --color-outline-variant: #262938;
+
+  --color-primary: #c084fc;
+  --color-primary-container: #9333ea;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #f6e6ff;
+
+  --color-secondary: #3b82f6;
+  --color-secondary-container: #2563eb;
+
+  --color-tertiary: #f472b6;
+  --color-tertiary-container: #ec4899;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0d0f17;
+    color: #f9fafb;
+    font-family: "Manrope", sans-serif;
+  }
+}
+
+h1, h2, h3, h4, h5, h6, .font-sora {
+  font-family: "Sora", sans-serif;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0f17;
+}
+::-webkit-scrollbar-thumb {
+  background: #24283c;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9333ea;
+}
+
+/* Prevent unwanted mobile browser auto-zoom on input focus (iOS Safari/Chrome & Android Chrome) */
+@media screen and (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
