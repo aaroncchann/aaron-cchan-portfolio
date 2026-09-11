@@ -3,6 +3,7 @@ import { ActiveScreen } from '../types';
 import { PORTFOLIO_INFO, SUGGESTED_PROMPTS } from '../data/portfolioData';
 import { useChat } from '../hooks/useChat';
 import { FlappyAvatar } from './FlappyAvatar';
+import { ExternalLink, Mail } from 'lucide-react';
 
 interface FlappyAIScreenProps {
   onNavigate: (screen: ActiveScreen) => void;
@@ -74,17 +75,71 @@ export const FlappyAIScreen: React.FC<FlappyAIScreenProps> = ({ onNavigate, onOp
     }
   };
 
-  // Helper to format inline bold, code, and links
+  // Helper to render styled, clickable links for web destinations and emails
+  const renderLink = (url: string, labelText?: string, key?: string | number) => {
+    let cleanUrl = url.trim();
+    let trailing = '';
+    // Strip trailing punctuation outside of URL
+    while (cleanUrl.length > 0 && /[.,;:!?)]$/.test(cleanUrl)) {
+      trailing = cleanUrl.slice(-1) + trailing;
+      cleanUrl = cleanUrl.slice(0, -1);
+    }
+
+    const isEmail = cleanUrl.startsWith('mailto:');
+    const label = labelText || cleanUrl.replace(/^mailto:/, '');
+
+    return (
+      <React.Fragment key={key}>
+        <a
+          href={cleanUrl}
+          target={isEmail ? undefined : '_blank'}
+          rel={isEmail ? undefined : 'noopener noreferrer'}
+          className="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 my-0.5 rounded-md bg-[#1c1f30] hover:bg-[#262938] border border-[#3b82f6]/30 hover:border-[#c084fc]/60 text-[#adc6ff] hover:text-white transition-all text-xs sm:text-sm font-medium break-all align-baseline group/link shadow-sm"
+        >
+          <span>{label}</span>
+          {isEmail ? (
+            <Mail className="w-3 h-3 text-[#c084fc] group-hover/link:text-white shrink-0 opacity-90" />
+          ) : (
+            <ExternalLink className="w-3 h-3 text-[#3b82f6] group-hover/link:text-[#c084fc] shrink-0 opacity-90" />
+          )}
+        </a>
+        {trailing}
+      </React.Fragment>
+    );
+  };
+
+  // Helper to parse bold (**text**), inline code (`code`), markdown links, and URLs
   const formatInlineText = (text: string): React.ReactNode => {
-    const parts = text.split(/(\*\*.*?\*\*|`.*?`)/g);
+    const tokenRegex = /(\[[^\]]+\]\((?:https?:\/\/|mailto:)[^\s)]+\)|\*\*[^*]+\*\*|`[^`]+`|(?:https?:\/\/|mailto:)[^\s<>()"']+)/g;
+    const parts = text.split(tokenRegex);
+
     return parts.map((part, i) => {
+      if (!part) return null;
+
+      // Markdown link: [Label](url)
+      const mdLinkMatch = part.match(/^\[([^\]]+)\]\(((?:https?:\/\/|mailto:)[^\s)]+)\)$/);
+      if (mdLinkMatch) {
+        const rawLabel = mdLinkMatch[1].replace(/^\*\*|\*\*$/g, '');
+        const url = mdLinkMatch[2];
+        return renderLink(url, rawLabel, i);
+      }
+
+      // Bold text: **text**
       if (part.startsWith('**') && part.endsWith('**')) {
+        const inner = part.slice(2, -2);
+        // Check if bold wraps a markdown link: **[Label](url)**
+        const innerMdLink = inner.match(/^\[([^\]]+)\]\(((?:https?:\/\/|mailto:)[^\s)]+)\)$/);
+        if (innerMdLink) {
+          return renderLink(innerMdLink[2], innerMdLink[1], i);
+        }
         return (
           <strong key={i} className="font-semibold text-white">
-            {part.slice(2, -2)}
+            {formatInlineText(inner)}
           </strong>
         );
       }
+
+      // Inline code: `code`
       if (part.startsWith('`') && part.endsWith('`')) {
         return (
           <code
@@ -95,6 +150,12 @@ export const FlappyAIScreen: React.FC<FlappyAIScreenProps> = ({ onNavigate, onOp
           </code>
         );
       }
+
+      // Raw URL: https://... or mailto:...
+      if (part.startsWith('http://') || part.startsWith('https://') || part.startsWith('mailto:')) {
+        return renderLink(part, undefined, i);
+      }
+
       return part;
     });
   };
